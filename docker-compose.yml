@@ -1,0 +1,77 @@
+# Hadoop cluster for Hands-on L4, built on the official Apache Hadoop image.
+# Image: apache/hadoop:3  (Hadoop 3.3.6, HADOOP_HOME=/opt/hadoop)
+
+x-hadoop: &hadoop
+  image: apache/hadoop:3
+  # apache/hadoop is published for linux/amd64 only. On Apple Silicon and other
+  # arm64 machines Docker emulates it. Declaring the platform here silences the
+  # mismatch warning and makes the behaviour explicit.
+  platform: linux/amd64
+  env_file:
+    - ./config
+  restart: on-failure
+
+services:
+
+  namenode:
+    <<: *hadoop
+    container_name: namenode
+    hostname: namenode
+    command: ["hdfs", "namenode"]
+    ports:
+      - "9870:9870"
+    environment:
+      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+
+  datanode1:
+    <<: *hadoop
+    container_name: datanode1
+    hostname: datanode1
+    command: ["hdfs", "datanode"]
+    depends_on: [namenode]
+
+  datanode2:
+    <<: *hadoop
+    container_name: datanode2
+    hostname: datanode2
+    command: ["hdfs", "datanode"]
+    depends_on: [namenode]
+
+  datanode3:
+    <<: *hadoop
+    container_name: datanode3
+    hostname: datanode3
+    command: ["hdfs", "datanode"]
+    depends_on: [namenode]
+
+  resourcemanager:
+    <<: *hadoop
+    container_name: resourcemanager
+    hostname: resourcemanager
+    command: ["yarn", "resourcemanager"]
+    ports:
+      - "8088:8088"
+    depends_on: [namenode]
+
+  nodemanager1:
+    <<: *hadoop
+    container_name: nodemanager1
+    hostname: nodemanager1
+    command: ["yarn", "nodemanager"]
+    depends_on: [resourcemanager]
+
+  nodemanager2:
+    <<: *hadoop
+    container_name: nodemanager2
+    hostname: nodemanager2
+    command: ["yarn", "nodemanager"]
+    depends_on: [resourcemanager]
+
+  historyserver:
+    <<: *hadoop
+    container_name: historyserver
+    hostname: historyserver
+    command: ["mapred", "historyserver"]
+    ports:
+      - "19888:19888"
+    depends_on: [resourcemanager]

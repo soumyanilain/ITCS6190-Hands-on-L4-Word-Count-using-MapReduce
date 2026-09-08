@@ -1,0 +1,13 @@
+# Maven build output
+target/
+
+# Job output pulled back from HDFS (commit the result file, not the whole tree)
+shared-folder/output/_SUCCESS
+shared-folder/output/**/.*.crc
+
+# Editors and OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
